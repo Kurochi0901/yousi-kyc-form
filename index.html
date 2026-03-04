@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>身份驗證申請</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --cream-dark: #ede6d6;
+    --gold: #b89a6a;
+    --gold-dark: #9a7e52;
+    --gold-light: #d4b896;
+    --brown: #5c4a32;
+    --brown-light: #7a6245;
+    --text: #3a2e1e;
+    --text-light: #6b5740;
+    --border: #d4c4a8;
+    --white: #fdfaf5;
+    --shadow: rgba(90,70,40,0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 20%, rgba(184,154,106,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(184,154,106,0.06) 0%, transparent 50%);
+  }
+
+  /* Header */
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 12px var(--shadow);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo-mark {
+    width:38px; height:38px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 14px; color: var(--gold); font-weight:600; letter-spacing:0.05em;
+  }
+  .logo-text { font-family:'Noto Serif TC',serif; font-size:18px; color:var(--brown); font-weight:500; letter-spacing:0.1em; }
+  .logo-sub  { font-size:11px; color:var(--text-light); letter-spacing:0.2em; margin-top:1px; }
+
+  /* Pages */
+  .page { display:none; animation: fadeIn 0.5s ease forwards; }
+  .page.active { display:block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  /* Container */
+  .container { max-width:680px; margin:48px auto; padding:0 24px 60px; }
+
+  .section-title {
+    font-family:'Noto Serif TC',serif; font-size:26px; font-weight:500;
+    color:var(--brown); text-align:center; letter-spacing:0.12em; margin-bottom:8px;
+  }
+  .section-sub { text-align:center; color:var(--text-light); font-size:13px; letter-spacing:0.06em; margin-bottom:36px; }
+
+  .divider { display:flex; align-items:center; gap:12px; margin:20px 0 32px; }
+  .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .divider-icon { color:var(--gold); font-size:16px; letter-spacing:4px; }
+
+  /* Card */
+  .card {
+    background:var(--white); border:1px solid var(--border);
+    border-radius:4px; padding:36px 40px;
+    box-shadow:0 4px 24px var(--shadow); position:relative; overflow:hidden;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-light));
+  }
+
+  /* Steps */
+  .steps { display:flex; justify-content:center; align-items:center; margin-bottom:36px; }
+  .step-item-inner { display:flex; flex-direction:column; align-items:center; }
+  .step-dot {
+    width:28px; height:28px; border-radius:50%;
+    border:2px solid var(--border); background:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:500; color:var(--text-light); transition:all 0.3s;
+  }
+  .step-dot.active  { border-color:var(--gold); background:var(--gold); color:var(--white); }
+  .step-dot.done    { border-color:var(--gold); background:var(--white); color:var(--gold); }
+  .step-label { font-size:11px; color:var(--text-light); letter-spacing:0.06em; margin-top:4px; white-space:nowrap; }
+  .step-line  { width:48px; height:1px; background:var(--border); margin:0 4px 20px; transition:background 0.3s; }
+  .step-line.done { background:var(--gold-light); }
+
+  /* Privacy */
+  .privacy-body { font-size:14px; line-height:2; color:var(--text-light); letter-spacing:0.04em; }
+  .privacy-body h3 { font-family:'Noto Serif TC',serif; font-size:15px; color:var(--brown); margin:20px 0 8px; font-weight:500; }
+  .privacy-body ul { padding-left:20px; margin-bottom:12px; }
+  .privacy-body ul li { margin-bottom:4px; }
+
+  .agree-row {
+    display:flex; align-items:flex-start; gap:12px;
+    margin:28px 0 24px; padding:16px;
+    background:rgba(184,154,106,0.06); border:1px solid var(--border); border-radius:2px;
+  }
+  .agree-row input[type="checkbox"] { width:18px; height:18px; accent-color:var(--gold); margin-top:2px; cursor:pointer; flex-shrink:0; }
+  .agree-row label { font-size:14px; color:var(--text); line-height:1.6; cursor:pointer; }
+
+  /* Form */
+  .form-group { margin-bottom:24px; }
+  .form-label { display:block; font-size:13px; font-weight:500; color:var(--brown); letter-spacing:0.08em; margin-bottom:8px; }
+  .form-label span { color:#c0392b; margin-left:2px; }
+  .form-input {
+    width:100%; padding:12px 16px;
+    border:1px solid var(--border); border-radius:2px;
+    background:var(--cream); font-family:'Noto Sans TC',sans-serif;
+    font-size:14px; color:var(--text); transition:border-color 0.25s, box-shadow 0.25s; outline:none;
+  }
+  .form-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(184,154,106,0.15); background:var(--white); }
+
+  /* Upload */
+  .upload-area {
+    border:2px dashed var(--border); border-radius:4px;
+    padding:28px 20px; text-align:center; cursor:pointer;
+    transition:all 0.3s; background:var(--cream); position:relative;
+  }
+  .upload-area:hover { border-color:var(--gold); background:rgba(184,154,106,0.06); }
+  .upload-area input[type="file"] { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+  .upload-icon { font-size:32px; margin-bottom:10px; display:block; }
+  .upload-text { font-size:14px; color:var(--brown-light); letter-spacing:0.06em; margin-bottom:4px; }
+  .upload-sub  { font-size:12px; color:var(--text-light); }
+
+  .preview-wrap { margin-top:12px; display:none; position:relative; }
+  .preview-wrap.show { display:block; }
+  .preview-img { width:100%; max-height:200px; object-fit:cover; border-radius:2px; border:1px solid var(--border); }
+  .preview-name { font-size:12px; color:var(--text-light); margin-top:4px; letter-spacing:0.04em; }
+  .preview-remove {
+    position:absolute; top:8px; right:8px;
+    background:rgba(90,60,30,0.7); color:#fff; border:none; border-radius:50%;
+    width:26px; height:26px; cursor:pointer; font-size:14px;
+    display:flex; align-items:center; justify-content:center; transition:background 0.2s;
+  }
+  .preview-remove:hover { background:rgba(90,60,30,0.9); }
+
+  /* Confirm */
+  .confirm-section { margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+  .confirm-section:last-of-type { border-bottom:none; }
+  .confirm-label { font-size:12px; color:var(--text-light); letter-spacing:0.1em; margin-bottom:4px; }
+  .confirm-value { font-size:16px; color:var(--text); font-weight:500; }
+  .confirm-images { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px; }
+  .confirm-img-wrap { border:1px solid var(--border); border-radius:2px; overflow:hidden; }
+  .confirm-img-label { font-size:11px; color:var(--text-light); letter-spacing:0.08em; padding:6px 10px; background:var(--cream); border-bottom:1px solid var(--border); }
+  .confirm-img { width:100%; height:140px; object-fit:cover; }
+
+  /* Buttons */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 32px; border:none; border-radius:2px;
+    font-family:'Noto Sans TC',sans-serif; font-size:14px; font-weight:500;
+    letter-spacing:0.12em; cursor:pointer; transition:all 0.25s;
+  }
+  .btn-primary { background:var(--gold); color:var(--white); }
+  .btn-primary:hover { background:var(--gold-dark); }
+  .btn-primary:disabled { background:var(--border); color:var(--text-light); cursor:not-allowed; }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text-light); }
+  .btn-outline:hover { border-color:var(--gold-light); color:var(--brown); }
+  .btn-row { display:flex; gap:12px; justify-content:flex-end; margin-top:32px; }
+
+  /* Success */
+  .success-icon {
+    width:72px; height:72px; border-radius:50%; border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 24px; font-size:32px;
+    animation: popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+  }
+  @keyframes popIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .success-title { font-family:'Noto Serif TC',serif; font-size:22px; color:var(--brown); text-align:center; letter-spacing:0.12em; margin-bottom:8px; }
+
+  /* Loading */
+  .loading-overlay {
+    position:fixed; inset:0; background:rgba(245,240,232,0.9);
+    display:none; align-items:center; justify-content:center;
+    z-index:999; flex-direction:column; gap:16px;
+  }
+  .loading-overlay.show { display:flex; }
+  .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:14px; color:var(--brown-light); letter-spacing:0.08em; }
+
+  /* Error */
+  .error-msg { color:#c0392b; font-size:12px; margin-top:5px; display:none; }
+  .error-msg.show { display:block; }
+  .alert { padding:12px 16px; border-radius:2px; font-size:13px; margin-bottom:20px; display:none; line-height:1.6; }
+  .alert.show { display:block; }
+  .alert-error { background:rgba(192,57,43,0.08); border:1px solid rgba(192,57,43,0.3); color:#c0392b; }
+
+  @media (max-width:600px) {
+    .card { padding:24px 20px; }
+    .container { margin:24px auto; }
+    .confirm-images { grid-template-columns:1fr; }
+    .step-line { width:28px; }
+    header { padding:14px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo-mark">酉</div>
+  <div>
+    <div class="logo-text">身份驗證申請</div>
+    <div class="logo-sub">IDENTITY VERIFICATION</div>
+  </div>
+</header>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">資料傳送中，請稍候⋯</div>
+</div>
+
+<!-- ═══════════════════ Page 1: Privacy ═══════════════════ -->
+<div class="page active" id="page-privacy">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:8px;">
+      <div class="divider"><span class="divider-icon">◆ ◇ ◆</span></div>
+    </div>
+    <h1 class="section-title">個人資料保護聲明</h1>
+    <p class="section-sub">請詳閱以下條款，同意後方可進行身份驗證申請</p>
+
+    <div class="steps">
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot active">1</div><div class="step-label">隱私聲明</div></div></div>
+      <div class="step-line"></div>
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot">2</div><div class="step-label">填寫資料</div></div></div>
+      <div class="step-line"></div>
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot">3</div><div class="step-label">確認送出</div></div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+        <span style="font-size:20px;">🔒</span>
+        <div>
+          <div style="font-family:'Noto Serif TC',serif; font-size:16px; color:var(--brown); letter-spacing:0.08em;">資料安全保護</div>
+          <div style="font-size:12px; color:var(--text-light); margin-top:2px;">依《個人資料保護法》及相關法規辦理</div>
+        </div>
+      </div>
+      <div class="privacy-body">
+        <h3>一、蒐集目的</h3>
+        <p style="border-left:3px solid var(--gold); background:rgba(184,154,106,0.1); padding:12px 16px; border-radius:0 2px 2px 0; color:var(--brown); font-weight:500; letter-spacing:0.05em;">本服務蒐集您的個人資料，僅用於身份驗證、確認會員有年滿18歲之目的，不作其他用途。</p>
+        <h3>二、蒐集項目</h3>
+        <ul>
+          <li>基本資料：姓名、聯絡電話</li>
+          <li>身份證明文件：身分證正面照片</li>
+          <li>生物特徵資料：本人自拍照片</li>
+        </ul>
+        <h3>三、資料利用期間與範圍</h3>
+        <p>您的個人資料將於審核完成後，依法規規定期限妥善保存，非經您的同意，不會提供予第三方機構。</p>
+        <h3>四、您的權利</h3>
+        <p>依《個人資料保護法》第三條，您得向本服務查詢、請求閱覽、更正、補充、停止蒐集或刪除您的個人資料。</p>
+        <h3>五、資料傳輸安全</h3>
+        <p>本表單採用加密傳輸機制，確保您的資料於傳輸過程中不被第三方截取或竄改。</p>
+      </div>
+      <div class="agree-row">
+        <input type="checkbox" id="agreeCheck">
+        <label for="agreeCheck">本人已詳閱並充分理解上述個人資料保護聲明，同意依照聲明所述之目的與範圍提供個人資料，並確認所填寫之資料均屬真實。</label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnToForm" disabled onclick="goToForm()">同意並繼續 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ Page 2: Form ═══════════════════ -->
+<div class="page" id="page-form">
+  <div class="container">
+    <h1 class="section-title">填寫申請資料</h1>
+    <p class="section-sub">請確實填寫以下欄位，所有欄位均為必填</p>
+
+    <div class="steps">
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot done">✓</div><div class="step-label">隱私聲明</div></div></div>
+      <div class="step-line done"></div>
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot active">2</div><div class="step-label">填寫資料</div></div></div>
+      <div class="step-line"></div>
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot">3</div><div class="step-label">確認送出</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="alert alert-error" id="formAlert"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputName">姓名 <span>*</span></label>
+        <input class="form-input" type="text" id="inputName" placeholder="請輸入真實姓名">
+        <div class="error-msg" id="err-name">請輸入姓名</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inputPhone">聯絡電話 <span>*</span></label>
+        <input class="form-input" type="tel" id="inputPhone" placeholder="例：0912-345-678">
+        <div class="error-msg" id="err-phone">請輸入有效的手機號碼</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">身分證正面照片 <span>*</span></label>
+        <div class="upload-area" id="idArea">
+          <input type="file" id="idFile" accept="image/*" capture="environment" onchange="handleFile('id', this)">
+          <span class="upload-icon">🪪</span>
+          <div class="upload-text">點擊上傳或拍攝身分證正面</div>
+          <div class="upload-sub">支援 JPG、PNG、HEIC · 檔案大小限制 10MB</div>
+        </div>
+        <div class="preview-wrap" id="idPreview">
+          <img class="preview-img" id="idImg" src="" alt="身分證預覽">
+          <div class="preview-name" id="idFileName"></div>
+          <button class="preview-remove" onclick="removeFile('id')">✕</button>
+        </div>
+        <div class="error-msg" id="err-id">請上傳身分證正面照片</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">本人自拍照 <span>*</span></label>
+        <div class="upload-area" id="selfieArea">
+          <input type="file" id="selfieFile" accept="image/*" capture="user" onchange="handleFile('selfie', this)">
+          <span class="upload-icon">🤳</span>
+          <div class="upload-text">點擊上傳或拍攝本人正面照</div>
+          <div class="upload-sub">請確保臉部清晰可見 · 支援 JPG、PNG、HEIC</div>
+        </div>
+        <div class="preview-wrap" id="selfiePreview">
+          <img class="preview-img" id="selfieImg" src="" alt="自拍照預覽">
+          <div class="preview-name" id="selfieFileName"></div>
+          <button class="preview-remove" onclick="removeFile('selfie')">✕</button>
+        </div>
+        <div class="error-msg" id="err-selfie">請上傳本人自拍照</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="showPage('privacy')">← 返回</button>
+        <button class="btn btn-primary" onclick="goToConfirm()">下一步 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ Page 3: Confirm ═══════════════════ -->
+<div class="page" id="page-confirm">
+  <div class="container">
+    <h1 class="section-title">確認申請資料</h1>
+    <p class="section-sub">請仔細核對以下資料，確認無誤後送出</p>
+
+    <div class="steps">
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot done">✓</div><div class="step-label">隱私聲明</div></div></div>
+      <div class="step-line done"></div>
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot done">✓</div><div class="step-label">填寫資料</div></div></div>
+      <div class="step-line done"></div>
+      <div class="step-item"><div class="step-item-inner"><div class="step-dot active">3</div><div class="step-label">確認送出</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="confirm-section">
+        <div class="confirm-label">▸ 姓名</div>
+        <div class="confirm-value" id="confirmName">—</div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">▸ 聯絡電話</div>
+        <div class="confirm-value" id="confirmPhone">—</div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">▸ 上傳照片</div>
+        <div class="confirm-images">
+          <div class="confirm-img-wrap">
+            <div class="confirm-img-label">身分證正面</div>
+            <img class="confirm-img" id="confirmId" src="" alt="">
+          </div>
+          <div class="confirm-img-wrap">
+            <div class="confirm-img-label">本人自拍照</div>
+            <img class="confirm-img" id="confirmSelfie" src="" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; padding:12px 16px; background:rgba(184,154,106,0.06); border:1px solid var(--border); border-radius:2px;">
+        <p style="font-size:12px; color:var(--text-light); line-height:1.8; letter-spacing:0.04em;">
+          ⚠️ 送出後，您的資料（含照片附件）將透過加密方式傳送至審核人員信箱。如需修改，請點擊「返回修改」。
+        </p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="showPage('form')">← 返回修改</button>
+        <button class="btn btn-primary" onclick="submitForm()">確認送出</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ Page 4: Success ═══════════════════ -->
+<div class="page" id="page-success">
+  <div class="container">
+    <div class="card" style="text-align:center; padding:60px 40px;">
+      <div class="success-icon">✦</div>
+      <h2 class="success-title">申請資料已送出</h2>
+      <p style="margin-top:16px; font-size:14px; color:var(--text-light); line-height:2; letter-spacing:0.04em;">
+        感謝您完成身份驗證申請<br>
+        審核人員將盡快與您聯繫<br><br>
+        <span style="font-size:12px; color:var(--border);">如有任何疑問，請透過官方管道與我們聯繫</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  🔧 設定區：部署 Google Apps Script 後，
+//     將取得的 Web App URL 貼到下方
+// ══════════════════════════════════════════════
+// 前端只需要知道 Vercel API 的路徑，Token 與 GAS_URL 都藏在後端
+const API_ENDPOINT = '/api/submit';
+
+// ── State ──────────────────────────────────────
+const state = {
+  idFile: null,     idBase64: null,   idExt: 'jpg',
+  selfieFile: null, selfieBase64: null, selfieExt: 'jpg'
+};
+
+// ── Page ───────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+// ── Privacy ────────────────────────────────────
+document.getElementById('agreeCheck').addEventListener('change', function() {
+  document.getElementById('btnToForm').disabled = !this.checked;
+});
+function goToForm() { showPage('form'); }
+
+// ── File handling ──────────────────────────────
+function getExtension(file) {
+  const parts = file.name.split('.');
+  const ext = parts.length > 1 ? parts.pop().toLowerCase() : 'jpg';
+  return ['jpg','jpeg','png','gif','webp','heic','heif'].includes(ext) ? ext : 'jpg';
+}
+
+function handleFile(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    alert('檔案大小超過 10MB，請重新選擇。');
+    input.value = ''; return;
+  }
+
+  state[type + 'File'] = file;
+  state[type + 'Ext']  = getExtension(file);
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    // Store raw base64 (strip data URL prefix)
+    state[type + 'Base64'] = dataUrl.split(',')[1];
+
+    document.getElementById(type + 'Img').src = dataUrl;
+    document.getElementById(type + 'FileName').textContent = '📎 ' + file.name;
+    document.getElementById(type + 'Preview').classList.add('show');
+    document.getElementById(type + 'Area').style.display = 'none';
+    hideError('err-' + type);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFile(type) {
+  state[type + 'File'] = null;
+  state[type + 'Base64'] = null;
+  document.getElementById(type + 'File').value = '';
+  document.getElementById(type + 'Img').src = '';
+  document.getElementById(type + 'Preview').classList.remove('show');
+  document.getElementById(type + 'Area').style.display = '';
+}
+
+// ── Validation ─────────────────────────────────
+function showError(id) { document.getElementById(id).classList.add('show'); }
+function hideError(id) { document.getElementById(id).classList.remove('show'); }
+
+function validateForm() {
+  let valid = true;
+  const name  = document.getElementById('inputName').value.trim();
+  const phone = document.getElementById('inputPhone').value.trim();
+
+  if (!name)  { showError('err-name');  valid = false; } else hideError('err-name');
+
+  const phoneClean = phone.replace(/[-\s]/g, '');
+  if (!phone || !/^0\d{8,9}$/.test(phoneClean)) {
+    showError('err-phone'); valid = false;
+  } else hideError('err-phone');
+
+  if (!state.idFile)     { showError('err-id');     valid = false; } else hideError('err-id');
+  if (!state.selfieFile) { showError('err-selfie'); valid = false; } else hideError('err-selfie');
+
+  return valid;
+}
+
+// ── Confirm page ───────────────────────────────
+function goToConfirm() {
+  if (!validateForm()) return;
+  document.getElementById('confirmName').textContent  = document.getElementById('inputName').value.trim();
+  document.getElementById('confirmPhone').textContent = document.getElementById('inputPhone').value.trim();
+  document.getElementById('confirmId').src     = document.getElementById('idImg').src;
+  document.getElementById('confirmSelfie').src = document.getElementById('selfieImg').src;
+  showPage('confirm');
+}
+
+// ── Submit ─────────────────────────────────────
+async function submitForm() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.add('show');
+
+  const payload = {
+    name:       document.getElementById('inputName').value.trim(),
+    phone:      document.getElementById('inputPhone').value.trim(),
+    time:       new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
+    id_card:    state.idBase64,
+    selfie:     state.selfieBase64,
+    id_ext:     state.idExt,
+    selfie_ext: state.selfieExt
+  };
+
+  try {
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    overlay.classList.remove('show');
+
+    if (json.status === 'ok') {
+      showPage('success');
+    } else {
+      throw new Error(json.message || '伺服器回應錯誤');
+    }
+  } catch (err) {
+    overlay.classList.remove('show');
+    alert('資料傳送失敗，請稍後再試。\n錯誤：' + err.message);
+  }
+}
+</script>
+</body>
+</html>

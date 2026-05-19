@@ -236,6 +236,11 @@
     </div>
     <h1 class="section-title">個人資料保護聲明</h1>
     <p class="section-sub">請詳閱以下條款，同意後方可進行身份驗證申請</p>
+    <div id="orderBadge" style="display:none; text-align:center; margin-bottom:24px;">
+      <span style="display:inline-block; padding:6px 16px; background:rgba(184,154,106,0.12); border:1px solid var(--gold-light); border-radius:20px; font-size:13px; color:var(--brown); letter-spacing:0.06em;">
+        訂單編號：<strong id="orderBadgeText" style="color:var(--gold-dark); letter-spacing:0.08em;"></strong>
+      </span>
+    </div>
 
     <div class="steps">
       <div class="step-item"><div class="step-item-inner"><div class="step-dot active">1</div><div class="step-label">隱私聲明</div></div></div>
@@ -415,8 +420,18 @@
       <h2 class="success-title">申請資料已送出</h2>
       <p style="margin-top:16px; font-size:14px; color:var(--text-light); line-height:2; letter-spacing:0.04em;">
         感謝您完成身份驗證申請<br>
-        審核人員將盡快與您聯繫<br><br>
-        <span style="font-size:12px; color:var(--border);">如有任何疑問，請透過官方管道與我們聯繫</span>
+        請加入官方 LINE，審核完成後<br>
+        將透過 LINE 通知您出貨進度<br>
+      </p>
+      <div style="margin-top:28px;">
+        <a href="https://line.me/ti/p/@008jcfgc" target="_blank" rel="noopener"
+           class="btn btn-primary"
+           style="background:#06C755; text-decoration:none; padding:15px 36px; font-size:15px;">
+          <span style="font-size:18px;">💬</span> 加入官方 LINE 接收通知
+        </a>
+      </div>
+      <p style="margin-top:24px; font-size:12px; color:var(--text-light); letter-spacing:0.04em;">
+        如有任何疑問，請透過官方 LINE 與我們聯繫
       </p>
     </div>
   </div>
@@ -433,8 +448,37 @@ const API_ENDPOINT = '/api/submit';
 // ── State ──────────────────────────────────────
 const state = {
   idFile: null,     idBase64: null,   idExt: 'jpg',
-  selfieFile: null, selfieBase64: null, selfieExt: 'jpg'
+  selfieFile: null, selfieBase64: null, selfieExt: 'jpg',
+  orderNo: ''
 };
+
+// ── 讀取網址訂單編號／姓名／電話 ────────────────
+(function initFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const orderNo = (params.get('order') || params.get('order_no') || '').trim();
+  const name    = (params.get('name')  || '').trim();
+  const phone   = (params.get('phone') || '').trim();
+
+  if (orderNo) {
+    state.orderNo = orderNo;
+    const badge = document.getElementById('orderBadge');
+    const badgeText = document.getElementById('orderBadgeText');
+    if (badge && badgeText) {
+      badgeText.textContent = orderNo;
+      badge.style.display = 'block';
+    }
+  }
+
+  // 自動預填姓名／電話（從下單頁帶過來）
+  if (name) {
+    const el = document.getElementById('inputName');
+    if (el) el.value = name;
+  }
+  if (phone) {
+    const el = document.getElementById('inputPhone');
+    if (el) el.value = phone;
+  }
+})();
 
 // ── Page ───────────────────────────────────────
 function showPage(id) {
@@ -529,6 +573,7 @@ async function submitForm() {
   overlay.classList.add('show');
 
   const payload = {
+    order_no:   state.orderNo,
     name:       document.getElementById('inputName').value.trim(),
     phone:      document.getElementById('inputPhone').value.trim(),
     time:       new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),

@@ -1,10 +1,6 @@
 // ═══════════════════════════════════════════════════════
 //  Vercel Serverless Function — api/submit.js
 //  負責驗證請求並轉發到 Google Apps Script
-//
-//  需在 Vercel 後台設定以下環境變數：
-//    GAS_URL          = 您的 Google Apps Script Web App URL
-//    GAS_SECRET_TOKEN = 6990b8597ab4ef1824882ba87d8fc32e47b7da36
 // ═══════════════════════════════════════════════════════
 
 export default async function handler(req, res) {
@@ -33,7 +29,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, phone, time, id_card, selfie, id_ext, selfie_ext } = req.body;
+    const { order_no, name, phone, time, id_card, selfie, id_ext, selfie_ext } = req.body;
 
     // ── 基本資料驗證 ──────────────────────────────
     if (!name || !phone) {
@@ -55,6 +51,7 @@ export default async function handler(req, res) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         token:      GAS_SECRET_TOKEN, // Token 從環境變數來，不會暴露給前端
+        order_no:   order_no || '',
         name,
         phone,
         time:       time || new Date().toLocaleString('zh-TW'),

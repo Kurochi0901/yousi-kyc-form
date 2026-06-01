@@ -500,30 +500,72 @@ function getExtension(file) {
   return ['jpg','jpeg','png','gif','webp','heic','heif'].includes(ext) ? ext : 'jpg';
 }
 
+// 壓縮圖片：長邊限制 1600px，JPEG 品質 0.82
+// 足夠辨識身分證文字與人臉，壓縮後約 200~500 KB
+function compressImage(file, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+
+        // 等比例縮放：長邊超過 maxSide 才縮
+        if (Math.max(w, h) > maxSide) {
+          if (w >= h) { h = Math.round(h * maxSide / w); w = maxSide; }
+          else        { w = Math.round(w * maxSide / h); h = maxSide; }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function handleFile(type, input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 10 * 1024 * 1024) {
-    alert('檔案大小超過 10MB，請重新選擇。');
+  if (file.size > 20 * 1024 * 1024) {
+    alert('檔案大小超過 20MB，請重新選擇。');
     input.value = ''; return;
   }
 
   state[type + 'File'] = file;
-  state[type + 'Ext']  = getExtension(file);
+  state[type + 'Ext']  = 'jpg'; // 壓縮後統一輸出 JPEG
 
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    // Store raw base64 (strip data URL prefix)
-    state[type + 'Base64'] = dataUrl.split(',')[1];
+  // 長邊上限：身分證 1600px（需辨識文字），自拍 1200px
+  const maxSide = (type === 'id') ? 1600 : 1200;
+  const quality = 0.82;
+
+  compressImage(file, maxSide, quality).then(dataUrl => {
+    const base64 = dataUrl.split(',')[1];
+    state[type + 'Base64'] = base64;
+
+    const origKB     = (file.size / 1024).toFixed(1);
+    const compKB     = (base64.length * 0.75 / 1024).toFixed(1);
+    const ratio      = ((1 - base64.length * 0.75 / file.size) * 100).toFixed(1);
+    console.log(`[壓縮] ${type} | 原始：${origKB} KB → 壓縮後：${compKB} KB（縮小 ${ratio}%）`);
 
     document.getElementById(type + 'Img').src = dataUrl;
     document.getElementById(type + 'FileName').textContent = '📎 ' + file.name;
     document.getElementById(type + 'Preview').classList.add('show');
     document.getElementById(type + 'Area').style.display = 'none';
     hideError('err-' + type);
-  };
-  reader.readAsDataURL(file);
+  }).catch(() => {
+    alert('圖片處理失敗，請重新選擇。');
+    input.value = '';
+  });
 }
 
 function removeFile(type) {
@@ -582,6 +624,9 @@ async function submitForm() {
     id_ext:     state.idExt,
     selfie_ext: state.selfieExt
   };
+
+  const payloadKB = (JSON.stringify(payload).length / 1024).toFixed(1);
+  console.log(`[送出] Payload 總大小：${payloadKB} KB（Vercel 上限 4608 KB）`);
 
   try {
     const res = await fetch(API_ENDPOINT, {
